@@ -107,3 +107,28 @@ resource "aws_route_table_association" "private_2_association" {
   route_table_id = aws_route_table.private_rt.id
   subnet_id      = aws_subnet.private-2.id
 }
+
+# Kostenlose Security Group erstellen
+resource "aws_security_group" "sg_dev" {
+  name_prefix = "dev-sg-"
+  vpc_id      = aws_vpc.dev_vpc.id
+
+  # Beispiel für eine Regel, die eingehenden HTTP-Verkehr erlaubt
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "icmp"
+  }
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+  }
+
+  tags = {
+    Name = "dev-sg"
+  }
+}
