@@ -1,122 +1,109 @@
-# Create a VPC to launch our instances into
+# VPC erstellen
 resource "aws_vpc" "dev_vpc" {
-  cidr_block = "10.0.0.0/16"  
+  cidr_block           = "10.0.0.0/16"  
   enable_dns_hostnames = true 
-  enable_dns_support = true
+  enable_dns_support   = true
   
-  tags       =  {
-    name     = "deham9"
+  tags = {
+    Name = "deham9"
   }       
 }
 
+# Öffentliches Subnet 1
 resource "aws_subnet" "public-1" {
-  vpc_id     = aws_vpc.dev_vpc.id
-  cidr_block = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
-  map_public_ip_on_launch = true
+  vpc_id                  = aws_vpc.dev_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = true # Automatische Zuweisung öffentlicher IPs
 
   tags = {
-    Name = "deham9"
+    Name = "deham9-public-1"
   }
 }
 
+# Privates Subnet 1
 resource "aws_subnet" "private-1" {
-  vpc_id     = aws_vpc.dev_vpc.id 
-  cidr_block = "10.0.2.0/24"
-  availability_zone = "us-east-1a"
+  vpc_id            = aws_vpc.dev_vpc.id 
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-west-2a"
 
   tags = {
-    Name = "deham9" 
+    Name = "deham9-private-1"
   }
 }
 
+# Öffentliches Subnet 2
 resource "aws_subnet" "public-2" {
-  vpc_id     = aws_vpc.dev_vpc.id
-  cidr_block = "10.0.3.0/24"
-  availability_zone = "us-east-1b"
+  vpc_id                  = aws_vpc.dev_vpc.id
+  cidr_block              = "10.0.3.0/24"
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "deham9"
+    Name = "deham9-public-2"
   }
 }
 
+# Privates Subnet 2
 resource "aws_subnet" "private-2" {
-  vpc_id     = aws_vpc.dev_vpc.id 
-  cidr_block = "10.0.4.0/24"
-  availability_zone = "us-east-1b"
+  vpc_id            = aws_vpc.dev_vpc.id 
+  cidr_block        = "10.0.4.0/24"
+  availability_zone = "us-west-2b"
 
   tags = {
-    Name = "deham9" 
+    Name = "deham10-private-2"
   }
 }
 
-# Create an Internet Gateway
+# Internet Gateway erstellen (nur für Public Subnets)
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.dev_vpc.id
+
   tags = {
-    Name = "deham9"
+    Name = "deham10-igw"
   }
 }
 
-# Allocate Elastic IP for NAT Gateway
-resource "aws_eip" "nat_eip" {
- // vpc = true ; not needed anymore, aws provider automatically assumes vpec = yes
-}
-
-# Create a NAT Gateway for the private subnet(s) to access the internet
-resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat_eip.id
-  subnet_id = aws_subnet.public-1.id # Reference public subnet ID
-
-  tags = {
-    Name = "nat-gw" 
-  }
-}
-
-resource "aws_route_table" "RB_Public_RouteTable" {
+# Route Table für Public Subnets (mit Internetzugang)
+resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.dev_vpc.id
 
   route {
-    cidr_block = var.CIDR_BLOCK
-    gateway_id = aws_internet_gateway.igw.id
-  }
-  tags = {
-    Name = "deham9"
-  }
-}
-
-resource "aws_route_table" "RB_Private_RouteTable" {
-  vpc_id = aws_vpc.dev_vpc.id
-
-  route { 
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
+
   tags = {
-    Name = "deham9"
+    Name = "deham10-public-rt"
   }
 }
-resource "aws_route_table_association" "Public_Subnet1_Asso" {
-  route_table_id = aws_route_table.RB_Public_RouteTable.id
+
+# Route Table für Private Subnets (kein Internetzugang)
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.dev_vpc.id
+
+  tags = {
+    Name = "deham10-private-rt"
+  }
+}
+
+# Route Table Assoziationen
+resource "aws_route_table_association" "public_1_association" {
+  route_table_id = aws_route_table.public_rt.id
   subnet_id      = aws_subnet.public-1.id
-  depends_on     = [aws_route_table.RB_Public_RouteTable, aws_subnet.public-1]
 }
 
-resource "aws_route_table_association" "Private_Subnet1_Asso" {
-  route_table_id = aws_route_table.RB_Private_RouteTable.id
-  subnet_id      = aws_subnet.private-1.id
-  depends_on     = [aws_route_table.RB_Private_RouteTable, aws_subnet.private-1]
-}
-
-resource "aws_route_table_association" "Public_Subnet2_Asso" {
-  route_table_id = aws_route_table.RB_Public_RouteTable.id
+resource "aws_route_table_association" "public_2_association" {
+  route_table_id = aws_route_table.public_rt.id
   subnet_id      = aws_subnet.public-2.id
-  depends_on     = [aws_route_table.RB_Public_RouteTable, aws_subnet.public-2]
 }
 
-resource "aws_route_table_association" "Private_Subnet2_Asso" {
-  route_table_id = aws_route_table.RB_Private_RouteTable.id
+resource "aws_route_table_association" "private_1_association" {
+  route_table_id = aws_route_table.private_rt.id
+  subnet_id      = aws_subnet.private-1.id
+}
+
+resource "aws_route_table_association" "private_2_association" {
+  route_table_id = aws_route_table.private_rt.id
   subnet_id      = aws_subnet.private-2.id
-  depends_on     = [aws_route_table.RB_Private_RouteTable, aws_subnet.private-2]
 }
