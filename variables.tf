@@ -48,6 +48,16 @@ variable "my_ip" {
   type        = string
 }
 
+variable "AWS_ACCESS_KEY_ID" {
+  description = "AWS access key ID"
+  sensitive   = true
+}
+
+variable "AWS_SESSION_TOKEN" {
+  description = "AWS session token"
+  sensitive   = true
+}
+
 variable "amis" {
   type        = map(string)
   description = "Region specific AMI"
@@ -55,4 +65,5 @@ variable "amis" {
     us-west-2    = "ami-000089c8d02060104"
     eu-central-1 = "ami-0ec8c354f85e48227"
   }
+
 }
