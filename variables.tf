@@ -43,6 +43,16 @@ variable "db_password" {
   sensitive   = true
 }
 
+variable "AWS_ACCESS_KEY_ID" {
+  description = "AWS access key ID"
+  sensitive   = true
+}
+
+variable "AWS_SESSION_TOKEN" {
+  description = "AWS session token"
+  sensitive   = true
+}
+
 variable "amis" {
   type        = map(string)
   description = "Region specific AMI"
