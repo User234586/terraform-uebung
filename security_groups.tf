@@ -75,6 +75,7 @@ resource "aws_security_group" "rds_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
   
 resource "aws_security_group" "efs_sg" {
   vpc_id = aws_vpc.wordpress_vpc.id
