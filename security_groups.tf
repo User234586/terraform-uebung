@@ -39,14 +39,15 @@ resource "aws_security_group" "ec2_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
+    cidr_blocks = ["${var.my_ip}/32"]  # Append /32
+
   }
   
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
+    cidr_blocks = ["${var.my_ip}/32"]  # Append /32
   }
 
   egress {
