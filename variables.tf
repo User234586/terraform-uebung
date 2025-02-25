@@ -43,14 +43,9 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "AWS_ACCESS_KEY_ID" {
-  description = "AWS access key ID"
-  sensitive   = true
-}
-
-variable "AWS_SESSION_TOKEN" {
-  description = "AWS session token"
-  sensitive   = true
+variable "my_ip" {
+  description = "Your public IP address"
+  type        = string
 }
 
 variable "amis" {
